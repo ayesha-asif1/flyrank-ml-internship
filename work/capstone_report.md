@@ -2,8 +2,8 @@
 
 - **Author:** Ayesha Asif
 - **Lane:** CTR / Engagement Opportunity Scoring
-- **Repo:** [tumhara GitHub repo URL yahan daalo]
-- **Date:** August 2026
+- **Repo:** https://github.com/ayesha-asif1/flyrank-ml-internship
+- **Date:** 28 August 2026
 
 ## 0. Abstract
 
@@ -44,6 +44,8 @@ Among 176,738 pages in a March 2026 search performance dataset, this study asks 
 **Why it's a fair comparison:** It uses the exact same data and the same label (CTR) as the ML model, and it establishes what a simple, transparent, position-relative comparison can achieve before adding model complexity.
 
 **Numbers:** Evaluated as a no-signal mean-CTR baseline for direct comparison with the regression model: R² ≈ 0.0000, MAE = 0.005485.
+
+Note: R²/MAE shown here are for the mean-CTR reference point used to evaluate the ML model in Section 5; the rule-based score itself is a ranking, not a regressor, so it is evaluated qualitatively via the reason-code breakdown in Section 7 of the notebook."
 
 ## 4. Model / analysis
 
