@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTR / Engagement Opportunity Scoring — FlyRank Capstone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F5F0;
+    --paper-2:#EFEBE1;
+    --ink:#17181C;
+    --ink-soft:#5B6470;
+    --teal:#0F5C52;
+    --teal-soft:#E4EFEC;
+    --gold:#C99A3C;
+    --rule:#DEDACD;
+    --red:#B4552E;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:0 28px;}
+  .masthead{border-bottom:1px solid var(--rule);padding:56px 0 40px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:0 0 18px;}
+  h1.title{font-family:'Newsreader',serif;font-weight:600;font-size:clamp(32px,5vw,46px);line-height:1.12;margin:0 0 22px;max-width:20ch;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:28px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink-soft);padding-top:8px;}
+  .meta-row span{display:block;}
+  .meta-row b{display:block;color:var(--ink);font-size:13px;margin-top:2px;}
+  .meta-row a{color:var(--teal);text-decoration:none;border-bottom:1px solid var(--teal);}
+  .scorecard{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);border-radius:2px;margin:40px 0 0;background:var(--paper-2);overflow:hidden;}
+  .score{padding:20px 18px;border-right:1px solid var(--rule);}
+  .score:last-child{border-right:none;}
+  .score .num{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:clamp(20px,3.2vw,28px);color:var(--teal);letter-spacing:-0.01em;}
+  .score .num.gold{color:var(--gold);}
+  .score .num.red{color:var(--red);}
+  .score .label{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.3;}
+  section{padding:52px 0;border-bottom:1px solid var(--rule);}
+  section:last-of-type{border-bottom:none;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;}
+  .sec-num{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.06em;}
+  h2{font-family:'Newsreader',serif;font-weight:600;font-size:26px;margin:0;color:var(--ink);}
+  h3{font-family:'Inter',sans-serif;font-weight:600;font-size:14.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--teal);margin:28px 0 10px;}
+  p{margin:0 0 16px;color:var(--ink);}
+  p.lede{font-family:'Newsreader',serif;font-size:19px;line-height:1.6;color:var(--ink);}
+  ul,ol{margin:0 0 16px;padding-left:22px;}
+  li{margin-bottom:8px;}
+  strong{font-weight:600;}
+  a{color:var(--teal);}
+  .callout{background:var(--teal-soft);border-left:3px solid var(--teal);padding:16px 20px;border-radius:2px;margin:22px 0;font-size:15px;}
+  .callout.warn{background:#F5EAE0;border-left-color:var(--red);}
+  .callout p:last-child{margin-bottom:0;}
+  figure{margin:26px 0;}
+  figure img{width:100%;display:block;border:1px solid var(--rule);border-radius:2px;background:#fff;}
+  figcaption{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);}
+  th{font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:500;}
+  td.num,th.num{font-family:'IBM Plex Mono',monospace;}
+  tr:last-child td{border-bottom:none;}
+  .tag-list{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:5px 10px;border:1px solid var(--rule);border-radius:20px;color:var(--ink-soft);background:#fff;}
+  .repro-steps{background:#fff;border:1px solid var(--rule);border-radius:3px;padding:20px 24px;font-size:14.5px;}
+  .repro-steps ol{margin-bottom:0;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:.92em;background:var(--paper-2);padding:1px 6px;border-radius:3px;}
+  footer{padding:44px 0 60px;text-align:center;}
+  footer .ack{font-family:'Newsreader',serif;font-style:italic;font-size:16px;color:var(--ink-soft);}
+  footer a{color:var(--teal);font-weight:500;text-decoration:none;border-bottom:1px solid var(--teal);}
+  @media (max-width:600px){
+    .scorecard{grid-template-columns:repeat(2,1fr);}
+    .score{border-bottom:1px solid var(--rule);}
+    .score:nth-child(2n){border-right:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="masthead">
+    <p class="eyebrow">FlyRank ML Internship — Capstone Research Paper</p>
+    <h1 class="title">Which pages are winning the ranking, but losing the click?</h1>
+    <p class="lede">A CTR opportunity-scoring study across 176,738 pages — comparing a transparent, position-relative rule against a machine learning model, and reporting an honest result either way.</p>
+    <div class="meta-row">
+      <span>Author<b>Ayesha Asif</b></span>
+      <span>Lane<b>CTR / Engagement Opportunity Scoring</b></span>
+      <span>Date<b>August 2026</b></span>
+      <span>Repo<b><a href="https://github.com/ayesha-asif1/flyrank-ml-internship">github.com/ayesha-asif1/flyrank-ml-internship</a></b></span>
+    </div>
+    <div class="scorecard">
+      <div class="score"><div class="num">176,738</div><div class="label">unique pages scored</div></div>
+      <div class="score"><div class="num gold">35.4%</div><div class="label">flagged high-priority for review</div></div>
+      <div class="score"><div class="num">0.0051</div><div class="label">model R² vs ≈0 baseline</div></div>
+      <div class="score"><div class="num red">0%</div><div class="label">content overlap in train/test split</div></div>
+    </div>
+  </div>
+
+  <section id="abstract">
+    <div class="sec-head"><span class="sec-num">00</span><h2>Abstract</h2></div>
+    <p>Among 176,738 pages in a March 2026 search performance dataset, this study asks which pages rank well but under-capture the clicks expected for their position — and whether that gap can be scored reliably enough to prioritize a content team's review queue. Using Google Search Console data filtered to reliable rows (36.7% of the raw partition), I built a transparent baseline that compares each page's actual click-through rate to the expected rate for its position bucket, weighted by impression volume to separate real signals from low-traffic flukes. I also trained a Random Forest regressor under a leakage-checked, grouped train/test split to test whether a learned model could out-predict this rule using position, impression volume, and day-of-week features. The honest result: the model only marginally beat a no-signal baseline (R²=0.0051 vs ≈0), showing that these features explain very little of CTR on their own — the missing signal is most likely page title and content quality, which weren't available in this dataset. The output is a ranked, reason-coded action queue — with roughly 35% of the portfolio flagged as high-priority metadata review candidates — intended as decision-support for a content team's triage, not an automated or causal verdict.</p>
+  </section>
+
+  <section id="problem">
+    <div class="sec-head"><span class="sec-num">01</span><h2>Problem framing</h2></div>
+    <h3>Unit of analysis</h3>
+    <p>One page (<code>content_hash_id</code>), aggregated across all of March 2026.</p>
+    <h3>Output</h3>
+    <p>A ranked score (<code>confidence_weighted_score</code>) with an accompanying reason code:</p>
+    <div class="tag-list">
+      <span class="tag">high_position_low_ctr</span>
+      <span class="tag">mid_position_low_ctr</span>
+      <span class="tag">low_confidence_signal</span>
+      <span class="tag">monitor_only</span>
+      <span class="tag">on_par_or_above</span>
+    </div>
+    <h3>Decision this supports</h3>
+    <p>An SEO strategist or content editor doing weekly/monthly triage needs to know which of hundreds of thousands of pages deserve a metadata or content review first. Rewriting titles and meta descriptions is cheap; reviewing every page manually is not. The decision this work supports is simple: <strong>where should limited review time go first?</strong></p>
+    <h3>Action a human takes</h3>
+    <p>Open a flagged page, verify the reason code manually — check the title/meta, check for cannibalization, check page age — and decide whether to rewrite metadata, run a content refresh, or leave it alone.</p>
+    <h3>Cost of a wrong call</h3>
+    <p>A false positive (flagging a page that's actually fine — e.g. an informational query where low CTR is expected) wastes editor time. A false negative (missing a real opportunity) leaves free, already-earned visibility uncaptured. Neither is catastrophic, which is why this is framed as decision-support, not automation.</p>
+    <div class="callout">
+      <p><strong>Why data/ML helps:</strong> with 176,738 unique pages, manual review of every page is infeasible. A transparent rule turns this into a ranked, explainable queue. An ML model was also tested to see if a learned model could meaningfully out-predict this rule — it could not, which is itself a useful, honest finding (see Results).</p>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Data &amp; safety</h2></div>
+    <p><strong>Data used:</strong> FlyRank/internship-warehouse (Hugging Face, gated), table <code>fact_content_daily_performance</code>, March 2026 partition (2026-03-01 to 2026-03-31). Rows were filtered to <code>gsc_data_available == True</code> (3,611,061 of 9,841,378 rows, 36.7%), then aggregated to one row per unique page.</p>
+    <table>
+      <tr><th>Stage</th><th class="num">Rows / Pages</th><th>Note</th></tr>
+      <tr><td>Raw March partition</td><td class="num">9,841,378</td><td>Full monthly export, daily grain</td></tr>
+      <tr><td>After GSC-reliability filter</td><td class="num">3,611,061</td><td>36.7% of raw rows retained</td></tr>
+      <tr><td>After page-level aggregation</td><td class="num">176,738</td><td>One row per unique page, month summed</td></tr>
+    </table>
+    <h3>Columns deliberately excluded</h3>
+    <ul>
+      <li><strong>gsc_clicks</strong> as a model feature — it is the numerator of the CTR label itself; including it would leak the answer directly.</li>
+      <li><strong>gsc_sum_position</strong> — redundant with gsc_avg_position, harder to interpret.</li>
+      <li><strong>All GA4 / session / AI-referral columns</strong> (pageviews, sessions, scroll events, AI-provider breakdowns) — these describe on-page behavior recorded only <em>after</em> a click has already happened, making them causally downstream of the CTR outcome being predicted.</li>
+      <li><strong>client_hash_id, content_hash_id, report_date</strong> — used only for grouping and filtering, never as model inputs, since raw IDs don't generalize to new pages or clients.</li>
+    </ul>
+    <h3>Leakage risks considered</h3>
+    <p>A structural check ran on every candidate feature — known before or only after a click happens? — followed by a correlation check as a secondary signal, not the primary test: a feature can be leaky with a weak correlation, as observed directly with <code>gsc_clicks</code> itself (only 0.10 correlation despite being mathematically part of the CTR formula). A before/after comparison of the model under a naive random split versus a grouped split confirmed the expected direction of leakage risk (naive R²=0.0062 vs grouped R²=0.0051) — smaller than expected, given how weak the overall signal already is.</p>
+    <div class="callout">
+      <p><strong>Client-identifying details:</strong> none. All identifiers are pre-hashed by the dataset provider. No client names, domains, URLs, or private queries appear anywhere in this project.</p>
+    </div>
+  </section>
+    <section id="methodology">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Methodology</h2></div>
+    <h3>Label definition</h3>
+    <p><code>CTR = total_clicks / total_impressions</code>, computed at the page level — summed across March, not averaged as daily ratios, which would let single-impression days distort the result.</p>
+    <h3>Baseline — the transparent rule</h3>
+    <ol>
+      <li><code>expected_ctr</code> = average CTR of all pages sharing the same position bucket (top_3, top_10, top_20, beyond_20).</li>
+      <li><code>opportunity_gap</code> = expected_ctr − actual_ctr.</li>
+      <li><code>confidence_weighted_score</code> = opportunity_gap × log(1 + total_impressions) — this discounts low-impression pages so a single-impression fluke can't outrank a well-evidenced gap.</li>
+    </ol>
+    <figure>
+      <img src="outputs/chart_expected_ctr_by_bucket.png" alt="Bar chart showing expected CTR rising sharply as position improves, from beyond_20 to top_3">
+      <figcaption>Fig. 1 — Expected CTR climbs sharply with better position, which is why the baseline judges every page relative to its own position bucket rather than in absolute terms.</figcaption>
+    </figure>
+    <h3>Model</h3>
+    <p>A Random Forest Regressor, chosen over Linear Regression and a single Decision Tree after an earlier honest-split test showed both underperforming or overfitting. Random Forest's averaging across trees reduces overfitting and can capture non-linear position–CTR relationships.</p>
+    <p><strong>Feature list:</strong> <code>gsc_impressions</code>, <code>log_impressions</code>, <code>gsc_avg_position</code>, <code>day_of_week</code>, <code>position_bucket</code> (one-hot encoded). <strong>Left out on purpose:</strong> gsc_clicks, gsc_sum_position, all GA4/session/AI-referral columns.</p>
+    <h3>Validation design</h3>
+    <p>A grouped split by <code>content_hash_id</code> (GroupShuffleSplit, 80/20), not time-aware — chosen because the task is cross-sectional (comparing pages to each other), not forecasting. The real risk was a page's multiple daily rows leaking into both train and test; the grouped split eliminates that, confirmed by zero content_hash_id overlap between the two sets.</p>
+  </section>
+
+  <section id="results">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Results vs. baseline</h2></div>
+    <table>
+      <tr><th>Approach</th><th class="num">R²</th><th class="num">MAE</th><th>Interpretation</th></tr>
+      <tr><td>Mean-CTR baseline</td><td class="num">≈0.0000</td><td class="num">0.005485</td><td>No-signal reference point</td></tr>
+      <tr><td>Random Forest</td><td class="num">0.0051</td><td class="num">0.005436</td><td>Marginal improvement — ~0.5% of variance explained</td></tr>
+    </table>
+    <div class="callout warn">
+      <p>The model only marginally beats a no-signal baseline. This is a well-understood <strong>negative result</strong>, not a failure of technique: the likely real drivers of CTR — title text, meta description quality, query intent, competing results — simply were not available as features here.</p>
+    </div>
+    <h3>Error analysis</h3>
+    <p>The largest individual errors occurred where actual CTR was 1.0 — a single click on a single impression, a statistical fluke the model cannot learn to predict. Mean absolute error was lowest in the <code>beyond_20</code> bucket (0.0024) and highest in <code>top_3</code> (0.0085): low-ranked content sits consistently near-zero CTR and is easy to predict, while top-ranked content carries far more variance these features don't explain.</p>
+    <h3>What the model actually leaned on</h3>
+    <p>Permutation importance shows <code>gsc_avg_position</code> dominates (≈0.0114), followed by <code>log_impressions</code> (≈0.0033) and <code>gsc_impressions</code> (≈0.0022). day_of_week and position_bucket contribute almost nothing once raw position is available — the model isn't finding anything the simpler rule missed.</p>
+    <h3>Surprise</h3>
+    <p>The gap between the naive (leaky) split and the honest grouped split was smaller than expected (0.0062 vs 0.0051) — leakage inflates results less when the underlying learnable signal is already this weak.</p>
+  </section>
+
+  <section id="recommendations">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Ranked recommendations</h2></div>
+    <figure>
+      <img src="outputs/chart_reason_code_distribution.png" alt="Bar chart showing the count of pages under each reason code, led by high_position_low_ctr">
+      <figcaption>Fig. 2 — Reason-code distribution across the full portfolio of 176,738 pages.</figcaption>
+    </figure>
+    <ol>
+      <li><strong>Prioritize the 62,586 <code>high_position_low_ctr</code> pages</strong> (35.4% of the portfolio) for metadata review first — highest leverage, lowest effort, since these pages already rank well.</li>
+      <li><strong>Treat the 33,148 <code>monitor_only</code> pages</strong> (beyond_20 position) as lower priority — position itself is the likely limiter, not metadata.</li>
+      <li><strong>Hold off on the 33,532 <code>low_confidence_signal</code> pages</strong> (median 3 impressions) until more data accumulates.</li>
+      <li><strong>Re-check every fix</strong> 30–60 days later against a fresh pipeline run, to confirm it actually worked.</li>
+    </ol>
+    <h3>How an editor uses this tomorrow</h3>
+    <p>Open the ranked queue, start from the top, open each flagged page, verify the reason code manually, then decide: rewrite, refresh, or leave it. This flags <em>where</em> to look — not <em>why</em> a page underperforms. A human still investigates every case.</p>
+  </section>
+
+  <section id="reproducibility">
+    <div class="sec-head"><span class="sec-num">06</span><h2>Reproducibility</h2></div>
+    <p><strong>Environment:</strong> Google Colab (free tier), Python 3 — pandas, numpy, scikit-learn (GroupShuffleSplit, RandomForestRegressor, permutation_importance), huggingface_hub, matplotlib. <strong>Seed:</strong> <code>random_state=42</code> throughout.</p>
+    <div class="repro-steps">
+      <ol>
+        <li>Add <code>HF_TOKEN</code> as a Colab Secret (Hugging Face read token for FlyRank/internship-warehouse).</li>
+        <li>Run <code>w03_data_contract.ipynb</code> → <code>w03_feature_leakage_check.ipynb</code>.</li>
+        <li>Run <code>w04_baseline_score.ipynb</code> — produces the ranked baseline.</li>
+        <li>Run <code>w05_model.ipynb</code> — produces the Random Forest comparison.</li>
+        <li>Run <code>w06_validation_audit.ipynb</code> — reproduces the naive-vs-grouped split check.</li>
+        <li>Run <code>w07_action_playbook.ipynb</code> — produces final exports in <code>work/outputs/</code>.</li>
+      </ol>
+    </div>
+    <p style="margin-top:16px;font-size:14px;color:var(--ink-soft);">Full repo, notebooks, and data outputs: <a href="https://github.com/ayesha-asif1/flyrank-ml-internship">github.com/ayesha-asif1/flyrank-ml-internship</a></p>
+  </section>
+
+  <section id="limitations">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Limitations</h2></div>
+    <ul>
+      <li>This model does not reliably predict individual-page CTR — 99.5% of CTR variation is driven by factors outside these five features.</li>
+      <li>No causal claims are made. The scores identify statistical deviation from a position's norm; they do not diagnose <em>why</em> a page underperforms.</li>
+      <li>Findings are observational and directional, based on one month of one dataset — they should not be generalized without re-validation.</li>
+      <li>The 10-impression confidence threshold is a reasonable judgment call, not a statistically derived cutoff.</li>
+    </ul>
+    <div class="callout">
+      <p><strong>Path forward:</strong> incorporating text-based features (title/meta content, keyword match) and SERP-context features (featured snippets, competing result count) is the most promising next step — the low R² here is evidence of what data would help, not a dead end.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="ack">Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai">flyrank.ai</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
+  
